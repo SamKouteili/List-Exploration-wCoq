@@ -130,7 +130,8 @@ Proof.
     -- rewrite -> (fold_unfold_eqb_list_cons V eqb_V v1 v1s' nil) in H_eqb.
        discriminate H_eqb.
     -- rewrite -> (fold_unfold_eqb_list_cons V eqb_V v1 v1s' (v2 :: v2s')) in H_eqb.
-       Search (_ && _ = true -> _ /\ _). (* andb_prop: forall a b : bool, a && b = true -> a = true /\ b = true *)
+       Search (_ && _ = true -> _ /\ _).
+       (* andb_prop: forall a b : bool, a && b = true -> a = true /\ b = true *)
        destruct (andb_prop (eqb_V v1 v2) (eqb_list V eqb_V v1s' v2s') H_eqb) as [H_eqb_1 H_eqb_2].
        rewrite -> (IHv1s' v2s' H_eqb_2).
        rewrite -> (C_eqb_V v1 v2 H_eqb_1).
@@ -270,23 +271,23 @@ Qed.
 
 (* Implement the length function using an accumulator. *)
 
-Fixpoint length_v1_aux (V : Type) (vs : list V) (a : nat) : nat  :=
+Fixpoint length_v1_aux (a : nat) (V : Type) (vs : list V) : nat  :=
   match vs with
     | nil =>
       a
     | v :: vs' =>
-      length_v1_aux V vs' (S a)
+      length_v1_aux (S a) V vs' 
   end.
 
 Definition length_v1 (V : Type) (vs : list V) : nat :=
-  length_v1_aux V vs 0.
+  length_v1_aux 0 V vs .
 
 Compute (test_length length_v1).
 
 Lemma fold_unfold_length_v1_aux_nil :
   forall (V : Type)
          (a: nat),
-    length_v1_aux V nil a =
+    length_v1_aux a V nil =
     a.
 Proof.
   fold_unfold_tactic length_v1_aux.
@@ -297,8 +298,8 @@ Lemma fold_unfold_length_v1_aux_cons :
          (v : V)
          (vs' : list V)
          (a: nat),
-    length_v1_aux V (v :: vs') a  =
-    length_v1_aux V vs' (S a).
+    length_v1_aux a V (v :: vs')  =
+    length_v1_aux (S a) V vs'.
 Proof.
   fold_unfold_tactic length_v1_aux.
 Qed.
@@ -309,8 +310,8 @@ Lemma about_length_v1_aux :
   forall (V : Type)
          (vs : list V)
          (a: nat),
-    length_v1_aux V vs (S a)  =
-    S (length_v1_aux V vs a).
+    length_v1_aux (S a) V vs  =
+    S (length_v1_aux a V vs).
 Proof.
   intros V vs.
   induction vs as [ | v vs' IHvs'].
@@ -326,10 +327,10 @@ Qed.
 
 (* this proof requires light of inductil *)
 
-Theorem length_v1_satisfies_the_specification_of_length :
-  specification_of_length length_v1.
+Theorem length_v1_aux_O_satisfies_the_specification_of_length :
+    specification_of_length (length_v1_aux 0).
 Proof.
-  unfold specification_of_length, length_v1.
+  unfold specification_of_length.
   split.
   - intro V.
     exact (fold_unfold_length_v1_aux_nil V 0).
@@ -338,6 +339,13 @@ Proof.
     exact (about_length_v1_aux V vs' 0).
 Qed.
 
+Corollary length_v1_satisfies_the_specification_of_length :
+  specification_of_length length_v1.
+Proof.
+  unfold length_v1.
+  exact (length_v1_aux_O_satisfies_the_specification_of_length).
+Qed.
+  
 (* ********** *)
 
 (* A study of the polymorphic, left-to-right indexing function: *)
