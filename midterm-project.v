@@ -528,33 +528,34 @@ Proof.
        exact (H_list_result).
     -- intro H_list_result.
        rewrite -> (fold_unfold_nat_nth_S V n' (v :: vs')) .
-       rewrite -> (fold_unfold_list_nth_cons V v vs' (S n')) in H_list_result.
+       rewrite -> (fold_unfold_list_nth_cons V v vs' (S n'))
+         in H_list_result.
        rewrite -> (IHn' vs' H_list_result).
        reflexivity.
 
   Restart.
 
   intros V vs.
-  induction vs as [ | vs' IHvs'].
+  induction vs as [ | v vs' IHvs'].
   - intro n.
-    induction n.
-    -- rewrite -> (fold_unfold_list_nth_nil V).
-       rewrite -> (fold_unfold_nat_nth_O V).
+    induction n as [ | n' _].
+    -- rewrite -> (fold_unfold_list_nth_nil V 0).
+       rewrite -> (fold_unfold_nat_nth_O V nil).
        intros ov H_ov.
        exact H_ov.
-    -- rewrite -> (fold_unfold_list_nth_nil V).
-       rewrite -> (fold_unfold_nat_nth_S V).
+    -- rewrite -> (fold_unfold_list_nth_nil V (S n')).
+       rewrite -> (fold_unfold_nat_nth_S V n' nil).
        intros ov H_ov.
        exact H_ov.
   - intro n.
-    induction n.
-    -- rewrite -> (fold_unfold_list_nth_cons V).
-       rewrite -> (fold_unfold_nat_nth_O V).
+    induction n as [ | n' _].
+    -- rewrite -> (fold_unfold_list_nth_cons V v vs' 0).
+       rewrite -> (fold_unfold_nat_nth_O V (v :: vs')).
        intros ov H_ov.
        exact H_ov.
     -- rewrite -> (fold_unfold_list_nth_cons V).
        rewrite -> (fold_unfold_nat_nth_S V).
-       exact (IHIHvs' n).
+       exact (IHvs' n).
 Qed.
 
 (* this proof requires light of inductil *)
