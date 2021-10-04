@@ -2179,6 +2179,83 @@ Definition list_fold_left_v2 (V W : Type) (nil_case : W) (cons_case : V -> W -> 
                     vs
                     nil_case.
 
+(* Testing list_fold_right/left_v1/v2 *)
+
+Definition length_v4 (V : Type) (l : list V) :=
+  list_fold_right_v1 V nat 0 (fun _ a => S a) l.
+
+Definition length_v5 (V : Type) (l : list V) :=
+  list_fold_right_v2 V nat 0 (fun _ a => S a) l.
+
+Compute test_length length_v4 && test_length length_v5.
+
+Definition length_v6 (V : Type) (l : list V) :=
+  list_fold_left_v1 V nat 0 (fun _ a => S a) l.
+
+Definition length_v7 (V : Type) (l : list V) :=
+  list_fold_left_v2 V nat 0 (fun _ a => S a) l.
+
+Compute test_length length_v6 && test_length length_v7.
+
+
+Definition append_v4 (V : Type) (l1 l2 : list V) :=
+  list_fold_right_v1 V (list V) l2 (fun v ih => v :: ih) l1.
+
+Definition append_v5 (V : Type) (l1 l2 : list V) :=
+  list_fold_right_v2 V (list V) l2 (fun v ih => v :: ih) l1.
+
+Compute test_append append_v4 && test_append append_v5.
+
+Definition append_v6 (V : Type) (l1 l2 : list V) :=
+  list_fold_left_v1 V (list V) (l2) (fun v ih => v :: ih) (reverse_v1 V l1).
+
+Definition append_v7 (V : Type) (l1 l2 : list V) :=
+  list_fold_left_v2 V (list V) (l2) (fun v ih => v :: ih) (reverse_v1 V l1).
+
+Compute test_append append_v6 && test_append append_v7.
+
+
+Definition copy_v4 (V : Type) (l : list V) :=
+  list_fold_right_v1 V (list V) nil (fun v ih => v :: ih) l.
+
+Definition copy_v5 (V : Type) (l : list V) :=
+  list_fold_right_v2 V (list V) nil (fun v ih => v :: ih) l.
+
+Compute test_copy copy_v4 && test_copy copy_v5.
+
+Definition copy_v6 (V : Type) (l : list V) :=
+  list_fold_left_v1 V (list V) nil (fun v ih => v :: ih) (reverse_v1 V l).
+
+Definition copy_v7 (V : Type) (l : list V) :=
+  list_fold_left_v2 V (list V) nil (fun v ih => v :: ih) (reverse_v1 V l).
+
+Compute test_copy copy_v6 && test_copy copy_v7.
+
+Definition copy_v8 (V : Type) (l : list V) := append_v4 V l nil.
+
+Definition copy_v9 (V : Type) (l : list V) := append_v6 V l nil.
+
+Compute test_copy copy_v8 && test_copy copy_v9.
+
+
+Definition reverse_v4 (V : Type) (l : list V) :=
+  list_fold_right_v1 V (list V) nil (fun v ih => v :: ih) (reverse_v1 V l).
+
+Definition reverse_v5 (V : Type) (l : list V) :=
+  list_fold_right_v2 V (list V) nil (fun v ih => v :: ih) (reverse_v1 V l).
+
+Compute test_reverse reverse_v4 && test_reverse reverse_v5.
+
+Definition reverse_v6 (V : Type) (l : list V) :=
+  list_fold_left_v1 V (list V) nil (fun v ih => v :: ih) l.
+
+Definition reverse_v7 (V : Type) (l : list V) :=
+  list_fold_left_v2 V (list V) nil (fun v ih => v :: ih) l.
+
+Compute test_reverse reverse_v6 && test_reverse reverse_v7.
+
+                                                
+
 (*
    n. Show that
       if the cons case is a function that is left permutative,
@@ -2241,6 +2318,29 @@ Qed.
 (*
    o. Can you think of corollaries of this property?
 *)
+
+
+Lemma length_cons_case_is_left_permutative :
+  forall (V : Type),
+    is_left_permutative (V : Type) nat (fun (_ : V) (a : nat) => S a).
+Proof.
+  intro V.
+  unfold is_left_permutative.
+  intros e1 e2 n.
+  reflexivity.
+Qed.
+
+Corollary length_is_equivalent_if_constructed_with_fold_left_or_fold_right :
+  forall (V : Type) (vs : list V),
+    length_v3 V vs = length_v2 V vs.
+Proof.
+  intro V.
+  unfold length_v2, length_v3.
+  Check (the_grand_finale V nat (fun (_ : V) (ih : nat) => S ih)
+                          (length_cons_case_is_left_permutative V) 0).
+  apply (the_grand_finale V nat (fun (_ : V) (ih : nat) => S ih)
+                          (length_cons_case_is_left_permutative V) 0).
+Qed.
 
 (*
    o. Can you think of corollaries of this property?
