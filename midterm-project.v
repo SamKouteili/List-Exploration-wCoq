@@ -537,8 +537,7 @@ Proof.
 
   intros V vs.
   induction vs as [ | v vs' IHvs'].
-  - intro n.
-    induction n as [ | n' _].
+  - destruct n as [ | n'].
     -- rewrite -> (fold_unfold_list_nth_nil V 0).
        rewrite -> (fold_unfold_nat_nth_O V nil).
        intros ov H_ov.
@@ -547,14 +546,13 @@ Proof.
        rewrite -> (fold_unfold_nat_nth_S V n' nil).
        intros ov H_ov.
        exact H_ov.
-  - intro n.
-    induction n as [ | n' _].
+  - destruct n as [ | n'].
     -- rewrite -> (fold_unfold_list_nth_cons V v vs' 0).
        rewrite -> (fold_unfold_nat_nth_O V (v :: vs')).
        intros ov H_ov.
        exact H_ov.
-    -- rewrite -> (fold_unfold_list_nth_cons V).
-       rewrite -> (fold_unfold_nat_nth_S V).
+    -- rewrite -> (fold_unfold_list_nth_cons V v vs' (S n')).
+       rewrite -> (fold_unfold_nat_nth_S V n' (v :: vs')).
        exact (IHvs' n').
 Qed.
 
@@ -598,7 +596,34 @@ Proof.
        rewrite -> (fold_unfold_list_nth_cons V v vs' (S n')).
        rewrite -> (IHvs' n' H_nat_result).
        reflexivity.
+
+       Restart.
+
+  intros V n vs ov.
+  revert vs.
+  induction n as [ | n' IHn'].
+  - destruct vs as [ | v vs'] eqn:H_vs.
+    -- intro H_nat_result.
+       rewrite -> (fold_unfold_nat_nth_O V nil) in H_nat_result.
+       rewrite -> (fold_unfold_list_nth_nil V 0).
+       exact (H_nat_result).
+    -- intro H_nat_result.
+       rewrite -> (fold_unfold_nat_nth_O V (v :: vs')) in H_nat_result.
+       rewrite -> (fold_unfold_list_nth_cons V v vs' 0).
+       exact (H_nat_result).
+  - destruct vs as [ | v vs'] eqn:H_vs.
+    -- intro H_nat_result.
+       rewrite -> (fold_unfold_nat_nth_S V n' nil) in H_nat_result.
+       rewrite -> (fold_unfold_list_nth_nil V (S n')).
+       exact (H_nat_result).
+    -- intro H_nat_result.
+       rewrite -> (fold_unfold_nat_nth_S V n' (v :: vs')) in H_nat_result.
+       rewrite -> (fold_unfold_list_nth_cons V v vs' (S n')).
+       rewrite -> (IHn' vs' H_nat_result).
+       reflexivity.      
 Qed.
+
+(* this proof requires light of inductil *)
 
 (*
    d. What do you conclude?
@@ -720,7 +745,8 @@ Proof.
        rewrite -> (fold_unfold_copy_v0_cons V v vs').
        rewrite -> (fold_unfold_length_v0_cons V v (copy_v0 V vs')).
        rewrite -> (fold_unfold_length_v0_cons V v vs') in H_length.
-       Search (S _ = S _). (* eq_add_S: forall n m : nat, S n = S m -> n = m *)
+       Search (S _ = S _).
+       (* eq_add_S: forall n m : nat, S n = S m -> n = m *)
        apply eq_add_S in H_length.
        rewrite -> (IHvs' n' H_length).
        reflexivity.
