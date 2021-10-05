@@ -555,7 +555,7 @@ Proof.
        exact H_ov.
     -- rewrite -> (fold_unfold_list_nth_cons V).
        rewrite -> (fold_unfold_nat_nth_S V).
-       exact (IHvs' n).
+       exact (IHvs' n').
 Qed.
 
 (* this proof requires light of inductil *)
