@@ -2132,20 +2132,36 @@ Lemma bar_satisfies_specification_of_reverse_aux :
            (vs : list V),
       append V (list_fold_left V (list V) nil cons_case vs') vs = list_fold_left V (list V) vs cons_case vs'.
       
-*)
+ *)
+
+ (*Lemma about_bar : *)
+  
+
+
 Proposition bar_satisfies_specification_of_reverse :
   specification_of_reverse bar.
 Proof.
   unfold specification_of_reverse, bar.
+  intros append spec_append.
   split.
-  - intro V.
+  - intros V.
     Check (fold_unfold_list_fold_left_nil V (list V) nil (fun (v : V) (vs : list V) => v :: vs)).
     exact (fold_unfold_list_fold_left_nil V (list V) nil (fun (v : V) (vs : list V) => v :: vs)).
   - intros V v vs'.
     Check (fold_unfold_list_fold_left_cons V (list V) nil (fun (v0 : V) (vs : list V) => v0 :: vs) v vs').
     rewrite -> (fold_unfold_list_fold_left_cons V (list V) nil (fun (v0 : V) (vs : list V) => v0 :: vs) v vs').
-    destruct H.
+    destruct spec_append as [a_0 a_1].
+    revert v.
+    Check fold_unfold_list_fold_left_cons  V (list V) nil (fun (v0 : V) (vs : list V) => v0 :: vs).
+    induction vs' as [ | v' vs'' IHvs'].
+    -- intro v.
+       rewrite -> (fold_unfold_list_fold_left_nil V (list V) (v :: nil)              (fun (v0 : V) (vs : list V) => v0 :: vs)).
+       rewrite -> (fold_unfold_list_fold_left_nil V (list V) (nil)              (fun (v0 : V) (vs : list V) => v0 :: vs)).
+       rewrite -> (a_0 V (v :: nil)).
+       reflexivity.
+    -- rewrite -> (fold_unfold_list_fold_left_cons V (list V) nil (fun (v0 : V) (vs : list V) => v0 :: vs) v' vs'').    
 Admitted.
+
 (*
   append : forall W : Type, list W -> list W -> list W
   H : forall (V : Type) (v2s : list V), append V nil v2s = v2s
